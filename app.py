@@ -1,4 +1,4 @@
-import dash
+from dash import Dash
 import dash_core_components as dcc
 import dash_html_components as html
 
@@ -6,36 +6,43 @@ from dash.dependencies import Input, Output, State
 from dash_table import DataTable
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app = Dash(__name__, external_stylesheets=external_stylesheets)
 server = app.server
 
 app.layout = html.Div([
-    html.H1('Fake Charity Name'),
+    html.Div([
+        html.Div([
 
-    html.Label('Area of Contribution: '),
-    dcc.Dropdown(
-        id='continent',
-        options=[
-            dict(label=x, value=x)
-            for x in ['North America', 'South America', 'Europe', 'Africa', 'Asia', 'Australia', 'Antarctica']
-        ],
-    ),
-    html.Br(),
-    
-    html.Label('Contribution Amount ($): '),
-    dcc.Input(id='amount', type='number'),
-    html.Br(),
-    html.Br(),
-    
-    html.Button('Submit', id='submit'),
-    html.Br(),
-    html.Br(),
-    
-    html.Div(id='test'),
-    html.Br(),
-    
-    html.Div(id='data'),
-    html.Br(),
+            html.Img(src='https://document-export.canva.com/DAEDvhGXJhI/396/preview/0001-9164315689.png', style={'width':'100%'}),
+
+        ], className="three columns"),
+
+        html.Div([
+
+            html.Label('Area of Contribution: '),
+            dcc.Dropdown(
+                id='continent',
+                options=[
+                    dict(label=x, value=x)
+                    for x in ['North America', 'South America', 'Europe', 'Africa', 'Asia', 'Australia', 'Antarctica']
+                ],
+            ),
+            html.Br(),
+            
+            html.Label('Contribution Amount ($): '),
+            dcc.Input(id='amount', type='number'),
+            html.Br(),
+            html.Br(),
+            
+            html.Button('Submit', id='submit'),
+            html.Br(),
+            html.Br(),
+            
+            html.Div(id='receipt'),
+            html.Br(),
+
+        ], className="four columns"),
+    ], className="row"),
 
     DataTable(
         id='table',
@@ -48,12 +55,11 @@ app.layout = html.Div([
 ])
 
 import datetime
-
 time = lambda: datetime.datetime.now().strftime("%y/%m/%d %H:%M:%S")
 
 @app.callback(
     [
-        Output('test', 'children'),
+        Output('receipt', 'children'),
         Output('table', 'data'),
     ],    
     [
@@ -66,7 +72,13 @@ time = lambda: datetime.datetime.now().strftime("%y/%m/%d %H:%M:%S")
         State('table', 'columns'),
     ]
 )
-def test(clicks, continent, amount, data, columns):
+def submit(clicks, continent, amount, data, columns):
+    if clicks==None:
+        return [
+            '',
+            [],
+        ]
+
     data.append(
         {
             key['id']: value
@@ -76,7 +88,7 @@ def test(clicks, continent, amount, data, columns):
     )
 
     return [
-        f'You want to give ${amount} to Fake Charity\'s {continent} Operations',
+        f'You want to give ${amount} to CryptoCharity\'s {continent} Operations',
         data,
     ]
 
