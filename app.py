@@ -27,22 +27,23 @@ app.layout = html.Div([
                     for x in ['North America', 'South America', 'Europe', 'Africa', 'Asia', 'Australia', 'Antarctica']
                 ],
             ),
+
             html.Br(),
             
             html.Label('Contribution Amount ($): '),
             dcc.Input(id='amount', type='number'),
+
             html.Br(),
             html.Br(),
             
             html.Button('Submit', id='submit'),
-            html.Br(),
-            html.Br(),
-            
-            html.Div(id='receipt'),
-            html.Br(),
 
-        ], className="four columns"),
+            html.Div(id='receipt'),
+
+        ], className="two columns"),
     ], className="row"),
+
+    html.Br(),
 
     DataTable(
         id='table',
