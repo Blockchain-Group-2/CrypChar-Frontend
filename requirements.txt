@@ -33,9 +33,6 @@ Flask-Compress==1.5.0
 future==0.18.2
 hexbytes==0.2.1
 idna==2.9
-ipykernel==5.3.4
-ipython==7.17.0
-ipython-genutils==0.2.0
 itsdangerous==1.1.0
 jedi==0.17.2
 Jinja2==2.11.2
