@@ -58,18 +58,6 @@ def getRow(hash):
 
     return event
 
-hashes=[]
-
-for i in range(2**22):
-    hash=contract.functions.get(i).call()
-
-    if hash==0:
-        break
-    
-    hashes.append(hash)
-
-events=[getRow(hash) for hash in hashes]
-
 from dash import Dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -149,16 +137,8 @@ app.layout = html.Div([
         ], className="three columns"),
 
         html.Div([
-                      
-            html.H2('All'),
-
-            html.Br(),
+            html.H2('Balances'),
             
-            html.Button('Update Tables', id='submit2'),
-
-            html.Br(),
-            html.Br(),
-
             DataTable(
                 id='balances',
                 columns=[
@@ -179,24 +159,19 @@ app.layout = html.Div([
 
     ], className="row"),
 
-    html.Br(),
-    html.Br(),
-    
+    html.H2('Transactions'),
 
-    html.Label('All Transactions'),
     DataTable(
         id='trans',
         columns=[
             dict(name=x, id=x.lower())
             for x in ['Sender', 'Receiver', 'Continent', 'Amount', 'Memo']
         ],
-        data=events,
+        data=[],
 
         style_as_list_view=True,
     ),  
 ])
-
-#app.run_server(mode='inline')
 
 @app.callback(
     [
@@ -244,10 +219,9 @@ def take(clicks, continent, amount, memo):
     [
         Input('submit', 'n_clicks'),
         Input('submit1', 'n_clicks'),
-        Input('submit2', 'n_clicks'),
     ],
 )
-def getBal(a, b, c):
+def getBal(a, b):
     data=[
         {
             'Continent': cont,
@@ -267,18 +241,24 @@ def getBal(a, b, c):
     [
         Input('submit', 'n_clicks'),
         Input('submit1', 'n_clicks'),
-        Input('submit2', 'n_clicks'),
     ],
     [
         State('trans', 'data'),
     ],    
 )
-def getBal(a, b, c, data):
-    hash=contract.functions.get(len(data)).call()
-    data.append(getRow(hash)) 
+def getTran(a, b, data):
+    hashes=[]
+
+    for i in range(len(data), 2**22):
+        hash=contract.functions.get(i).call()
+
+        if hash==0:
+            break
+        
+        hashes.append(hash)    
 
     return [
-        data
+        data+[getRow(hash) for hash in hashes]
     ]
 
 
