@@ -1,1 +1,7 @@
-First draft of smart contract web app for Blockchain Club group project.
+Version 2 of CryptoCharity Blockchain Project
+
+Kind of uses contract in this repo (https://github.com/Blockchain-Group-2/CrypChar-Smart-Contract), which is the same that Version 0 depended on. The difference is that the same contract (which you can find at /Contracts/contract.sol) is deployed through web3.py
+
+web3.py is more flexible than Truffle regarding the contract code. The deployment through web3 is also faster
+
+This repo is intended merely for Heroku to deploy a web app. The Contracts folder doesn't affect Heroku; it merely stores the contract.
