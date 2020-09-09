@@ -1,62 +1,53 @@
+#necessary libraries
 import json
+import datetime
 from web3 import Web3, HTTPProvider
 
+#sets up web3
 url= 'https://sandbox.truffleteams.com/8f7572d1-e253-420a-93bc-2ed8a6f051e6'
-
 web3 = Web3(HTTPProvider(url))
 
 acc=web3.eth.accounts
-acc
-
 user, charity, store = acc[:3]
+web3.eth.defaultAccount = user
 
-continents=['Asia', 'Africa', 'North America', 'South America', 'Antarctica', 'Europe', 'Australia']
+address, abi = ('0x5d77eA44A5D268f1B482678AAf67c03873003a87', [{'stateMutability': 'payable', 'type': 'fallback'}, {'inputs': [{'internalType': 'uint256', 'name': '', 'type': 'uint256'}], 'name': 'bals', 'outputs': [{'internalType': 'int256', 'name': '', 'type': 'int256'}], 'stateMutability': 'view', 'type': 'function'}, {'inputs': [], 'name': 'getBals', 'outputs': [{'internalType': 'int256[7]', 'name': '', 'type': 'int256[7]'}], 'stateMutability': 'nonpayable', 'type': 'function'}, {'inputs': [], 'name': 'length', 'outputs': [{'internalType': 'uint256', 'name': '', 'type': 'uint256'}], 'stateMutability': 'view', 'type': 'function'}, {'inputs': [{'internalType': 'uint256', 'name': '', 'type': 'uint256'}], 'name': 'logs', 'outputs': [{'internalType': 'string', 'name': 'time', 'type': 'string'}, {'internalType': 'address', 'name': 'from', 'type': 'address'}, {'internalType': 'address', 'name': 'to', 'type': 'address'}, {'internalType': 'uint256', 'name': 'cont', 'type': 'uint256'}, {'internalType': 'int256', 'name': 'value', 'type': 'int256'}, {'internalType': 'string', 'name': 'memo', 'type': 'string'}, {'internalType': 'string', 'name': 'hash', 'type': 'string'}], 'stateMutability': 'view', 'type': 'function'}, {'inputs': [{'internalType': 'string', 'name': 'time', 'type': 'string'}, {'internalType': 'address', 'name': 'to', 'type': 'address'}, {'internalType': 'uint256', 'name': 'cont', 'type': 'uint256'}, {'internalType': 'int256', 'name': 'value', 'type': 'int256'}, {'internalType': 'string', 'name': 'memo', 'type': 'string'}, {'internalType': 'string', 'name': 'hash', 'type': 'string'}], 'name': 'store', 'outputs': [{'internalType': 'bool', 'name': '', 'type': 'bool'}], 'stateMutability': 'nonpayable', 'type': 'function'}])
+c=web3.eth.contract(abi=abi, address=address)
 
-abi = [ { "inputs": [], "stateMutability": "nonpayable", "type": "constructor" }, { "anonymous": False, "inputs": [ { "indexed": False, "internalType": "address", "name": "sender", "type": "address" }, { "indexed": False, "internalType": "address", "name": "receiver", "type": "address" }, { "indexed": False, "internalType": "uint256", "name": "continent", "type": "uint256" }, { "indexed": False, "internalType": "uint256", "name": "amount", "type": "uint256" }, { "indexed": False, "internalType": "bytes", "name": "memo", "type": "bytes" } ], "name": "t", "type": "event" }, { "inputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "name": "balances", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "i", "type": "uint256" } ], "name": "get", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "i", "type": "uint256" } ], "name": "getBalance", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "payable", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "name": "hash", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [], "name": "i", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "uint256", "name": "num", "type": "uint256" } ], "name": "store", "outputs": [ { "internalType": "bool", "name": "success", "type": "bool" } ], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "receiver", "type": "address" }, { "internalType": "uint256", "name": "to", "type": "uint256" }, { "internalType": "uint256", "name": "value", "type": "uint256" }, { "internalType": "string", "name": "memo", "type": "string" } ], "name": "transfer", "outputs": [ { "internalType": "bool", "name": "success", "type": "bool" } ], "stateMutability": "payable", "type": "function" }, { "inputs": [ { "internalType": "address", "name": "receiver", "type": "address" }, { "internalType": "uint256", "name": "to", "type": "uint256" }, { "internalType": "uint256", "name": "value", "type": "uint256" }, { "internalType": "string", "name": "memo", "type": "string" } ], "name": "withdraw", "outputs": [ { "internalType": "bool", "name": "success", "type": "bool" } ], "stateMutability": "payable", "type": "function" } ]
+#FUNCTIONS FOR FRONTEND
 
-address = '0xD9e149644653CF0D7B834D9D89CAa7bFfEdB0E3f'
+#returns formatted current time
+now=lambda: datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
 
-contract = web3.eth.contract(address=address, abi=abi)
-
+#transfers ether from user to charity and records it
 def donate(continent, value): #value in wei
     web3.eth.defaultAccount=user
-
-    if value>web3.eth.getBalance(user):
-        return False
-
-    hash=contract.functions.transfer(charity, continents.index(continent), value, '').transact()
-    contract.functions.store(int(web3.toHex(hash), 16)).transact()
-
-    return web3.eth.sendTransaction(
+  
+    hash=web3.eth.sendTransaction(
         {
             'to': charity,
             'value': value,
         }
     )
+    
+    c.functions.store(now(), charity, continent, value, '', hash.hex()).transact()
 
-def spend(continent, amount, memo):
+#transfers ether from charity to store and records it
+def spend(continent, value, memo): #value in wei
     web3.eth.defaultAccount=charity
-
-    if amount>contract.functions.getBalance(continents.index(continent)).call():
-        return False
-
-    hash=contract.functions.withdraw(store, continents.index(continent), amount, memo).transact()
-    contract.functions.store(int(web3.toHex(hash), 16)).transact()
-
-    return web3.eth.sendTransaction(
+  
+    hash=web3.eth.sendTransaction(
         {
             'to': store,
-            'value': amount,
+            'value': value,
         }
     )
 
-def getRow(hash):
-    event=dict(contract.events.t().processReceipt(web3.eth.getTransactionReceipt(hex(hash)))[0]['args'])
+    c.functions.store(now(), store, continent, -value, memo, hash.hex()).transact()
 
-    event['memo']=event['memo'].decode('utf-8')
-    event['continent']=continents[event['continent']]
-
-    return event
+#frontend layout
+continents=['Asia', 'Africa', 'North America', 'South America', 'Antarctica', 'Europe', 'Australia']
+headers=['Time', 'From', 'To', 'Continent', 'Amount', 'Memo', 'Hash']
 
 from dash import Dash
 import dash_core_components as dcc
@@ -98,7 +89,7 @@ app.layout = html.Div([
             html.Br(),
             html.Br(),
             
-            html.Button('Submit', id='submit'),
+            html.Button('Donate', id='submit'),
 
             html.Div(id='receipt'),
 
@@ -130,7 +121,7 @@ app.layout = html.Div([
             html.Br(),
             html.Br(),
             
-            html.Button('Submit', id='submit1'),
+            html.Button('Spend', id='submit1'),
 
             html.Div(id='receipt1'),
 
@@ -149,6 +140,10 @@ app.layout = html.Div([
                 style_as_list_view=True,
             ),
 
+            html.Br(),
+            
+            html.Button('Update Tables', id='submit2'),
+
         ], className="two columns"),
 
         html.Div([
@@ -164,8 +159,8 @@ app.layout = html.Div([
     DataTable(
         id='trans',
         columns=[
-            dict(name=x, id=x.lower())
-            for x in ['Sender', 'Receiver', 'Continent', 'Amount', 'Memo']
+            dict(name=x, id=x)
+            for x in headers
         ],
         data=[],
         filter_action="native",
@@ -179,6 +174,10 @@ app.layout = html.Div([
     ),  
 ])
 
+#FRONTEND CALLBACK FUNCTION
+
+#when 'Donate' button is hit, user sends ether to charity
+#transaction is recorded
 @app.callback(
     [
         Output('receipt', 'children'),
@@ -191,13 +190,18 @@ app.layout = html.Div([
         State('amount', 'value'),
     ]
 )
-def give(clicks, continent, amount):
+def give(clicks, cont, amount):
+    continent=continents.index(cont)
+
     donate(continent, amount)
 
     return [
-        f'{continent}, {amount}',
+        f'{cont}, {amount}',
     ]
 
+#when 'Spend' button is hit, charity sends ether to store
+#the 'store' represents all vendors to the charity
+#transaction is recorded
 @app.callback(
     [
         Output('receipt1', 'children'),
@@ -211,27 +215,29 @@ def give(clicks, continent, amount):
         State('memo', 'value'),
     ]
 )
-def take(clicks, continent, amount, memo):
+def take(clicks, cont, amount, memo):
+    continent=continents.index(cont)
+
     spend(continent, amount, memo)
 
     return [
-        f'{continent}, {amount}, {memo}',
+        f'{cont}, {amount}, {memo}',
     ]
 
+#fills Balances Table
 @app.callback(
     [
         Output('balances', 'data'),
     ],    
     [
-        Input('submit', 'n_clicks'),
-        Input('submit1', 'n_clicks'),
+        Input('submit2', 'n_clicks'),
     ],
 )
-def getBal(a, b):
+def getBals(clicks):
     data=[
         {
             'Continent': cont,
-            'Balance': contract.functions.getBalance(i).call()
+            'Balance': c.functions.bals(i).call()
         }
         for i, cont in enumerate(continents)
     ]
@@ -240,33 +246,23 @@ def getBal(a, b):
         data
     ]
 
+#fills Transaction Table
 @app.callback(
     [
         Output('trans', 'data'),
     ],    
     [
-        Input('submit', 'n_clicks'),
-        Input('submit1', 'n_clicks'),
+        Input('submit2', 'n_clicks'),
     ],
-    [
-        State('trans', 'data'),
-    ],    
 )
-def getTran(a, b, data):
-    hashes=[]
-
-    for i in range(len(data), 2**22):
-        hash=contract.functions.get(i).call()
-
-        if hash==0:
-            break
-        
-        hashes.append(hash)    
+def getTrans(clicks):
+    logs=[c.functions.logs(i).call() for i in range(c.functions.length().call())]
+    data=[{header: x for header, x in zip(headers, log)} for log in logs] 
 
     return [
-        data+[getRow(hash) for hash in hashes]
+        data
     ]
 
-
+#driver
 if __name__ == '__main__':
     app.run_server()
