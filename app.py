@@ -136,6 +136,13 @@ app.layout = html.Div([
                     dict(name=x, id=x)
                     for x in ['Continent', 'Balance']
                 ],
+                
+                style_cell_conditional=[
+                    {
+                        'if': {'column_id': 'Continent'},
+                        'textAlign': 'left'
+                    }
+                ],
 
                 style_as_list_view=True,
             ),
