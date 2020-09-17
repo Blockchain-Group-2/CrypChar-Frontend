@@ -47,7 +47,7 @@ def spend(continent, value, memo): #value in wei
 
 #frontend layout
 continents=['0. Asia', '1. Africa', '2. North America', '3. South America', '4. Antarctica', '5. Europe', '6. Australia']
-headers=['Time', 'From', 'To', 'Continent', 'Amount', 'Memo', 'Hash']
+headers=['Timestamp (UTC)', 'From', 'To', 'Continent', 'Amount', 'Memo', 'Hash']
 
 from dash import Dash
 import dash_core_components as dcc
