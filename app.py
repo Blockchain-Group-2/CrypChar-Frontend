@@ -1,5 +1,4 @@
 import json, requests
-import datetime
 from web3 import Web3, HTTPProvider
 
 #sets up web3
