@@ -1,4 +1,4 @@
-import json, requests
+import json
 from web3 import Web3, HTTPProvider
 
 #sets up web3
@@ -11,20 +11,7 @@ user, charity, store = acc[:3]
 headers=['TimestampEST', 'From', 'To', 'Continent', 'Value', 'Memo', 'TxnHash']
 continents=['Asia', 'Africa', 'North America', 'South America', 'Antarctica', 'Europe', 'Australia']
 
-links=[
-    'https://drive.google.com/file/d/1Q7t6vPKjGSztqW0pa7XvFiBoM6lf4TNx/view?usp=sharing',
-    'https://drive.google.com/file/d/1fMeRkSb2ft8-WZm8TfLBrGNMBvCOxDeF/view?usp=sharing',
-    'https://drive.google.com/file/d/1eo4OEBJguToG-E1GzX6ha2hMonV9Ei-C/view?usp=sharing'
-]
-
-def readtxt(orig_url):
-    file_id = orig_url.split('/')[-2]
-    dwn_url='https://drive.google.com/uc?export=download&id=' + file_id
-    return requests.get(dwn_url).text
-
-abi=json.loads(text[0])
-bytecode=json.loads(text[1])['object']
-address=text[2]
+address, abi = '0x34b41A8f1b89e94F9E50283DD9F3a296C620E2fA', '[ { "anonymous": false, "inputs": [ { "indexed": false, "internalType": "bytes", "name": "TimestampEST", "type": "bytes" }, { "indexed": false, "internalType": "address", "name": "From", "type": "address" }, { "indexed": false, "internalType": "address", "name": "To", "type": "address" }, { "indexed": false, "internalType": "uint256", "name": "Continent", "type": "uint256" }, { "indexed": false, "internalType": "uint256", "name": "Value", "type": "uint256" }, { "indexed": false, "internalType": "bytes", "name": "Memo", "type": "bytes" }, { "indexed": false, "internalType": "bytes", "name": "TxnHash", "type": "bytes" } ], "name": "trans", "type": "event" }, { "stateMutability": "payable", "type": "fallback" }, { "inputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "name": "bals", "outputs": [ { "internalType": "uint256", "name": "", "type": "uint256" } ], "stateMutability": "view", "type": "function" }, { "inputs": [ { "internalType": "string", "name": "time", "type": "string" }, { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "cont", "type": "uint256" }, { "internalType": "uint256", "name": "value", "type": "uint256" }, { "internalType": "string", "name": "memo", "type": "string" }, { "internalType": "string", "name": "hash", "type": "string" } ], "name": "give", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "nonpayable", "type": "function" }, { "inputs": [ { "internalType": "string", "name": "time", "type": "string" }, { "internalType": "address", "name": "to", "type": "address" }, { "internalType": "uint256", "name": "cont", "type": "uint256" }, { "internalType": "uint256", "name": "value", "type": "uint256" }, { "internalType": "string", "name": "memo", "type": "string" }, { "internalType": "string", "name": "hash", "type": "string" } ], "name": "take", "outputs": [ { "internalType": "bool", "name": "", "type": "bool" } ], "stateMutability": "nonpayable", "type": "function" } ]'
 
 c=web3.eth.contract(abi=abi, address=address)
 filt = c.eventFilter('trans', {'fromBlock': 0,'toBlock': 'latest'});
