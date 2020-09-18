@@ -2,50 +2,67 @@ pragma solidity >=0.4.22 <0.7.0;
 
 contract MetaCoin {
     
-    int[7] public bals;
+    uint[7] public bals;
     
-    function getBals() public returns (int[7] memory){
-        return bals;
-    }
+    event trans(
+        bytes TimestampEST,
+        address From,
+        address To,
+        uint Continent,
+        uint Value,
+        bytes Memo,
+        bytes TxnHash
+    );
     
-    struct log{
-        string time;
-        address from;
-        address to;
-        uint cont;
-        int value;
-        string memo;
-        string hash;
-    }
-    log[] public logs;
-    uint public length=0;
-    
-    function store(
+    function give(
         string memory time,
         address to,
         uint cont,
-        int value,
+        uint value,
         string memory memo,
         string memory hash
     ) public returns (bool){
         
-        //changes balance
-        if (value+bals[cont]<0) return false;
+        // changes balance
         bals[cont]+=value;
         
-        //stores faux event as struct
-        log memory t;
+        // emits event
+        emit trans(
+            bytes(time),
+            msg.sender,
+            to,
+            cont,
+            value,
+            bytes(memo),
+            bytes(hash)
+        );
         
-        t.time=time;
-        t.from=msg.sender;
-        t.to=to;
-        t.cont=cont;
-        t.value=value;
-        t.memo=memo;
-        t.hash=hash;
+        return true;
+    }
+    
+    function take(
+        string memory time,
+        address to,
+        uint cont,
+        uint value,
+        string memory memo,
+        string memory hash
+    ) public returns (bool){
         
-        logs.push(t);
-        length++;
+        // changes balance
+        if (bals[cont]<value) return false;
+        bals[cont]-=value;
+        
+        // emits event
+        emit trans(
+            bytes(time),
+            msg.sender,
+            to,
+            cont,
+            value,
+            bytes(memo),
+            bytes(hash)
+        );
         
         return true;
     }
