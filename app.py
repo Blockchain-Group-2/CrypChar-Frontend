@@ -1,5 +1,4 @@
-#necessary libraries
-import json
+import json, requests
 import datetime
 from web3 import Web3, HTTPProvider
 
@@ -9,15 +8,32 @@ web3 = Web3(HTTPProvider(url))
 
 acc=web3.eth.accounts
 user, charity, store = acc[:3]
-web3.eth.defaultAccount = user
 
-address, abi = ('0xd3B2B908f5f2eD2ec9F1d6Bce1EFe32C65935C0A', [{'stateMutability': 'payable', 'type': 'fallback'}, {'inputs': [{'internalType': 'uint256', 'name': '', 'type': 'uint256'}], 'name': 'bals', 'outputs': [{'internalType': 'int256', 'name': '', 'type': 'int256'}], 'stateMutability': 'view', 'type': 'function'}, {'inputs': [], 'name': 'getBals', 'outputs': [{'internalType': 'int256[7]', 'name': '', 'type': 'int256[7]'}], 'stateMutability': 'nonpayable', 'type': 'function'}, {'inputs': [], 'name': 'length', 'outputs': [{'internalType': 'uint256', 'name': '', 'type': 'uint256'}], 'stateMutability': 'view', 'type': 'function'}, {'inputs': [{'internalType': 'uint256', 'name': '', 'type': 'uint256'}], 'name': 'logs', 'outputs': [{'internalType': 'string', 'name': 'time', 'type': 'string'}, {'internalType': 'address', 'name': 'from', 'type': 'address'}, {'internalType': 'address', 'name': 'to', 'type': 'address'}, {'internalType': 'uint256', 'name': 'cont', 'type': 'uint256'}, {'internalType': 'int256', 'name': 'value', 'type': 'int256'}, {'internalType': 'string', 'name': 'memo', 'type': 'string'}, {'internalType': 'string', 'name': 'hash', 'type': 'string'}], 'stateMutability': 'view', 'type': 'function'}, {'inputs': [{'internalType': 'string', 'name': 'time', 'type': 'string'}, {'internalType': 'address', 'name': 'to', 'type': 'address'}, {'internalType': 'uint256', 'name': 'cont', 'type': 'uint256'}, {'internalType': 'int256', 'name': 'value', 'type': 'int256'}, {'internalType': 'string', 'name': 'memo', 'type': 'string'}, {'internalType': 'string', 'name': 'hash', 'type': 'string'}], 'name': 'store', 'outputs': [{'internalType': 'bool', 'name': '', 'type': 'bool'}], 'stateMutability': 'nonpayable', 'type': 'function'}])
+headers=['TimestampEST', 'From', 'To', 'Continent', 'Value', 'Memo', 'TxnHash']
+continents=['Asia', 'Africa', 'North America', 'South America', 'Antarctica', 'Europe', 'Australia']
+
+links=[
+    'https://drive.google.com/file/d/1Q7t6vPKjGSztqW0pa7XvFiBoM6lf4TNx/view?usp=sharing',
+    'https://drive.google.com/file/d/1fMeRkSb2ft8-WZm8TfLBrGNMBvCOxDeF/view?usp=sharing',
+    'https://drive.google.com/file/d/1eo4OEBJguToG-E1GzX6ha2hMonV9Ei-C/view?usp=sharing'
+]
+
+def readtxt(orig_url):
+    file_id = orig_url.split('/')[-2]
+    dwn_url='https://drive.google.com/uc?export=download&id=' + file_id
+    return requests.get(dwn_url).text
+
+abi=json.loads(text[0])
+bytecode=json.loads(text[1])['object']
+address=text[2]
+
 c=web3.eth.contract(abi=abi, address=address)
+filt = c.eventFilter('trans', {'fromBlock': 0,'toBlock': 'latest'});
 
 #FUNCTIONS FOR FRONTEND
-
-#returns formatted current time
-now=lambda: datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
+import datetime, pytz
+tz=pytz.timezone('America/Detroit')
+now=lambda: datetime.datetime.now(tz).strftime("%m/%d/%Y, %H:%M:%S")
 
 #transfers ether from user to charity and records it
 def donate(continent, value): #value in wei
@@ -30,7 +46,7 @@ def donate(continent, value): #value in wei
         }
     )
     
-    c.functions.store(now(), charity, continent, value, '', hash.hex()).transact()
+    c.functions.give(now(), charity, continent, value, '', hash.hex()).transact()
 
 #transfers ether from charity to store and records it
 def spend(continent, value, memo): #value in wei
@@ -43,12 +59,9 @@ def spend(continent, value, memo): #value in wei
         }
     )
 
-    c.functions.store(now(), store, continent, -value, memo, hash.hex()).transact()
+    c.functions.take(now(), store, continent, value, memo, hash.hex()).transact()
 
 #frontend layout
-continents=['0. Asia', '1. Africa', '2. North America', '3. South America', '4. Antarctica', '5. Europe', '6. Australia']
-headers=['Timestamp (UTC)', 'From', 'To', 'Continent', 'Amount', 'Memo', 'Hash']
-
 from dash import Dash
 import dash_core_components as dcc
 import dash_html_components as html
@@ -176,13 +189,10 @@ app.layout = html.Div([
         page_action="native",
         page_current= 0,
         page_size= 10,
-
-        style_as_list_view=True,
     ),  
 ])
 
-#FRONTEND CALLBACK FUNCTION
-
+#FRONTEND CALLBACK FUNCTIONS
 #when 'Donate' button is hit, user sends ether to charity
 #transaction is recorded
 @app.callback(
@@ -263,11 +273,15 @@ def getBals(clicks):
     ],
 )
 def getTrans(clicks):
-    logs=[c.functions.logs(i).call() for i in range(c.functions.length().call())]
-    data=[{header: x for header, x in zip(headers, log)} for log in logs] 
+    events=[dict(tran['args']) for tran in filt.get_all_entries()]
+    for event in events:
+        event['Continent']=continents[event['Continent']]
+
+        for key in 'TxnHash Memo TimestampEST'.split():
+            event[key]=event[key].decode('UTF-8')
 
     return [
-        data
+        events
     ]
 
 #driver
