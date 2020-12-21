@@ -1,4 +1,4 @@
-Version 2 of CryptoCharity Blockchain Project
+Version 2 of CryptoCharity Blockchain Project, reuploaded all previous code.
 
 Uses contract at /Smart Contract/contract.sol, which is deployed through web3.py
 
