@@ -1,70 +1,29 @@
 pragma solidity >=0.4.22 <0.7.0;
 
-contract MetaCoin {
-    
+contract CryptoCharity {
+    event txns(bytes TimestampEST, address From, address To, uint Continent, uint Value, bytes Memo, bytes TxnHash);
     uint[7] public bals;
     
-    event trans(
-        bytes TimestampEST,
-        address From,
-        address To,
-        uint Continent,
-        uint Value,
-        bytes Memo,
-        bytes TxnHash
-    );
-    
-    function give(
-        string memory time,
-        address to,
-        uint cont,
-        uint value,
-        string memory memo,
-        string memory hash
-    ) public returns (bool){
-        
+    function give(string memory time, address to, uint cont, uint value, string memory memo, string memory hash) public{
         // changes balance
-        bals[cont]+=value;
+        bals[cont] += value;
         
         // emits event
-        emit trans(
-            bytes(time),
-            msg.sender,
-            to,
-            cont,
-            value,
-            bytes(memo),
-            bytes(hash)
-        );
-        
-        return true;
+        emit txns(bytes(time), msg.sender, to, cont, value, bytes(memo), bytes(hash));
     }
     
-    function take(
-        string memory time,
-        address to,
-        uint cont,
-        uint value,
-        string memory memo,
-        string memory hash
-    ) public returns (bool){
-        
-        // changes balance
-        if (bals[cont]<value) return false;
-        bals[cont]-=value;
-        
-        // emits event
-        emit trans(
-            bytes(time),
-            msg.sender,
-            to,
-            cont,
-            value,
-            bytes(memo),
-            bytes(hash)
+    function take(string memory time, address to, uint cont, uint value, string memory memo, string memory hash) public{
+        // checks balance
+        require(
+            bals[cont] >= value,
+            "Continent must be able to afford withdrawal"
         );
         
-        return true;
+        // changes balance
+        bals[cont] -= value;
+        
+        // emits event
+        emit txns(bytes(time), msg.sender, to, cont, value, bytes(memo), bytes(hash));
     }
     
     fallback() external payable { }
